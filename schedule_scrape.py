@@ -16,13 +16,6 @@ for year in YEARS:
 
     response = requests.request("POST", url, data=payload, headers=headers)
 
-    # # print(response.text)
-
-    # with open("2022_schedule.json") as json_data:
-    #     all_data = json.load(json_data)
-    #     data = all_data['data']['schedule']['completed']
-    #     season = all_data['data']['schedule']['seasonYear']    
-
     all_data = response.json()
     data = all_data['data']['schedule']['completed']
     season = all_data['data']['schedule']['seasonYear'] 
