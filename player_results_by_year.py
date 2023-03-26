@@ -87,7 +87,7 @@ with connection[0] as conn:
             ) 
               
         VALUES
-        (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        (%s, %s, to_date(%s, 'MM.DD.YYYY'), %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
 
         tournaments = all_data['data']['playerProfileSeasonResults']['tournaments']
