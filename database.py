@@ -49,7 +49,7 @@ class Database:
         self.conn.close()
 
 
-    def write(self, table: str, columns: list[str], values: list, return_key: str)
+    def write(self, table: str, columns: list[str], values: list, return_key: str):
         insert_string = """
         INSERT INTO {} ({}) VALUES
         ({}) RETURNING {}      
