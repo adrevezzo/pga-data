@@ -17,6 +17,7 @@ class Database:
             self.database = env.get("DBNAME")
         else:
             raise ValueError("Enter a valid environment name (prod/dev)")
+        
         self.user = env.get("USERNAME")
         self.password = env.get("PASSWORD")
         self.port = env.get("PORT")
@@ -26,8 +27,10 @@ class Database:
         self.open()
         return (self.conn, self.cursor)
 
+
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
+
 
     def open(self):
         self.conn = connect(
@@ -46,21 +49,18 @@ class Database:
         self.conn.close()
 
 
-    def write(self, table: str, columns: list[str], values: list, return_key: str):
-        self.open()
-        with self.conn as conn:
-            with self.cursor as cur:
-                insert_string = """
-                INSERT INTO {} ({}) VALUES
-                ({}) RETURNING {}      
-                """
-                cur.execute(sql.SQL(insert_string).format(
-                    sql.Identifier(table), 
-                    sql.SQL(",").join(map(sql.Identifier, columns)),
-                    sql.SQL(",").join(map(sql.Literal, values)),
-                    sql.Identifier(return_key)
-                    ))
-                
-                results = cur.fetchone().get(return_key)              
-        self.close()       
+    def write(self, table: str, columns: list[str], values: list, return_key: str)
+        insert_string = """
+        INSERT INTO {} ({}) VALUES
+        ({}) RETURNING {}      
+        """
+        self.cursor.execute(sql.SQL(insert_string).format(
+            sql.Identifier(table), 
+            sql.SQL(",").join(map(sql.Identifier, columns)),
+            sql.SQL(",").join(map(sql.Literal, values)),
+            sql.Identifier(return_key)
+            ))
+        
+        results = self.cursor.fetchone().get(return_key)              
+     
         return results
