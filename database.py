@@ -6,15 +6,28 @@ from psycopg2.extras import RealDictCursor
 load_dotenv()
 
 class Database:
-    def __init__(self) -> None:
+    def __init__(self, db_type='prod') -> None:
         self.conn = None
         self.cursor = None
         self.host = env.get("HOST")
-        self.database = env.get("DBNAME")
+
+        if db_type.lower() == 'dev':
+            self.database = env.get("DBNAME_DEV")
+        elif db_type.lower() == 'prod':
+            self.database = env.get("DBNAME")
+        else:
+            raise ValueError("Enter a valid environment name (prod/dev)")
         self.user = env.get("USERNAME")
         self.password = env.get("PASSWORD")
         self.port = env.get("PORT")
 
+
+    def __enter__(self):
+        self.open()
+        return (self.conn, self.cursor)
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
 
     def open(self):
         self.conn = connect(
@@ -25,9 +38,7 @@ class Database:
             port = self.port
         )
 
-        self.cursor = self.conn.cursor(cursor_factory=RealDictCursor)
-
-        return self.conn, self.cursor
+        self.cursor = self.conn.cursor(cursor_factory=RealDictCursor)      
            
 
     def close(self):
