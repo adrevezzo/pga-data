@@ -27,3 +27,24 @@ VALUES
 TOURNAMENT_ID_SELECT = """
     SELECT id FROM tournaments WHERE pga_tournament_id = %s
 """
+
+SCHEDULE_INSERT_QUERY = """
+INSERT INTO tournaments (
+    pga_tournament_id,
+    tournament_name,
+    tournament_num,
+    first_place_earnings,
+    purse,
+    city,
+    state,
+    country,
+    course_name,
+    month,
+    year,
+    season_year            
+    ) 
+    
+
+VALUES
+(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+"""
