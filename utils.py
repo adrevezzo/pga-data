@@ -18,3 +18,60 @@ def name_clean(name_string):
             else:
                 name += char
     return name[::-1]
+
+COUNTRIES_FOR_OWGR = [
+    'Africa',
+    'Argentina',
+    'Australia',
+    'Austria',
+    'Bangladesh',
+    'Belgium',
+    'Canada',
+    'Chile',
+    'China',
+    'Colombia',
+    'Denmark',
+    'England',
+    'Fiji',
+    'Finland',
+    'France',
+    'Germany',
+    'Holland',
+    'India',
+    'Ireland',
+    'Italy',
+    'Japan',
+    'Korea',
+    'Malaysia',
+    'Mexico',
+    'Netherlands',
+    'Norway',
+    'Paraguay',
+    'Philippines',
+    'Poland',
+    'Portugal',
+    'Republic',
+    'Rico',
+    'Scotland',
+    'Slovakia',
+    'Spain',
+    'States',
+    'Sweden',
+    'Taipei',
+    'Thailand',
+    'Venezuela',
+    'Venezuala',
+    'Wales',
+    'Zealand',
+    'Zimbabwe'
+]
+
+COUNTRY_PREFIX_FOR_OWGR = [
+    'United',
+    'N',
+    'South',
+    'New',
+    'Chinese',
+    'Czech',
+    'Puerto'
+]
