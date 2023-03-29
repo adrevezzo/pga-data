@@ -2,7 +2,7 @@ import os
 import re
 from PyPDF2 import PdfReader
 import pandas as pd
-from utils import COUNTRIES_FOR_OWGR, COUNTRY_PREFIX_FOR_OWGR
+from utils import COUNTRIES_FOR_OWGR, COUNTRY_PREFIX_FOR_OWGR, COUNTRY_NAME_MAP, COUNTRY_CONCAT_WORDS_FOR_OWGR
 import datetime
 
 
@@ -45,11 +45,11 @@ def fill_last_6_fields(dictionary: dict, page: list, current_index:int, date):
     dictionary['events_played_div'].append(page[current_index+2])
     dictionary['points_lost_this_year'].append(page[current_index+3])
     dictionary['points_won_this_year'].append(page[current_index+4])
-    dictionary['events_played_act'].append(page[current_index+5])
+    try:
+        dictionary['events_played_act'].append(page[current_index+5])
+    except IndexError:
+        dictionary['events_played_act'].append(None)
     dictionary['week_of'].append(date)
-
-
-
 
 
 filepath = 'owgr_pdfs/'
@@ -59,9 +59,10 @@ avg_point_pattern = re.compile(r'^[0-9]+\.[0-9]+$')
 pdf_filename_pattern = re.compile(r'^owgr(?P<week>[0-9]{2})f(?P<year>[0-9]{4}).pdf$')
 
 end_prev_year_index = None
-country_count = 0
 
-for filename in os.listdir("owgr_pdfs")[:2]:
+
+for file_num, filename in enumerate(os.listdir("owgr_pdfs")):
+    print(f"************ {file_num} ************\n********{filename}*******")
     owgr_dict = {
         'this_week':[],
         'last_week':[],
@@ -80,7 +81,9 @@ for filename in os.listdir("owgr_pdfs")[:2]:
     file_match = pdf_filename_pattern.search(filename)
     week_of = datetime.date.fromisocalendar(int(file_match.group('year')),int(file_match.group('week')),7)
 
-    for page in read_pdf(f"{filepath}{filename}"):
+    for page_num, page in enumerate(read_pdf(f"{filepath}{filename}")[:5]):
+        country_count = 0
+        # print(page)
         for i, word in enumerate(page):
             country_type = None
             if row_start_pattern.search(word):
@@ -89,9 +92,18 @@ for filename in os.listdir("owgr_pdfs")[:2]:
                 owgr_dict['end_prev_year'].append(clean_week_strings(page[i+1]))
                 end_prev_year_index = i+1
 
+            # Three word country
+            if avg_point_pattern.search(word) and page[i-1] in COUNTRY_CONCAT_WORDS_FOR_OWGR and page[i-2] in COUNTRIES_FOR_OWGR and page[i-3] in COUNTRY_PREFIX_FOR_OWGR:
+                country_count +=1
+                # print(f"three-word country: {page[i-2]} {page[i-1]} : {country_count}")
+                owgr_dict['country'].append(f"{page[i-3]} {page[i-2]}")
+                owgr_dict['full_name'].append(clean_full_name(end_prev_year_index + 1, i-3))
+                fill_last_6_fields(owgr_dict, page, i, week_of.strftime("%Y-%m-%d"))
+
+
             # Two word country
             if avg_point_pattern.search(word) and page[i-1] in COUNTRIES_FOR_OWGR and page[i-2] in COUNTRY_PREFIX_FOR_OWGR:
-                # country_count +=1
+                country_count +=1
                 # print(f"two-word country: {page[i-2]} {page[i-1]} : {country_count}")
                 owgr_dict['country'].append(f"{page[i-2]} {page[i-1]}")
                 owgr_dict['full_name'].append(clean_full_name(end_prev_year_index + 1, i-2))
@@ -100,10 +112,10 @@ for filename in os.listdir("owgr_pdfs")[:2]:
 
             # One word country
             if avg_point_pattern.search(word) and page[i-1] in COUNTRIES_FOR_OWGR and page[i-2] not in COUNTRY_PREFIX_FOR_OWGR: 
-                # country_count +=1
+                country_count +=1
                 # print(f"one-word country: {page[i-1]} : {country_count}")
-                if page[i-1] == "Venezuala":
-                    owgr_dict['country'].append("Venezuela")
+                if page[i-1] in COUNTRY_NAME_MAP.keys():
+                    owgr_dict['country'].append(COUNTRY_NAME_MAP.get(page[i-1]))
                 else:
                     owgr_dict['country'].append(page[i-1])
                 owgr_dict['full_name'].append(clean_full_name(end_prev_year_index + 1, i-1))
@@ -111,5 +123,5 @@ for filename in os.listdir("owgr_pdfs")[:2]:
 
                     
     owgr_df = pd.DataFrame(owgr_dict)
-    print(owgr_df.head(10),"\n", owgr_df.tail(10))
+    print(owgr_df.head(3))
 

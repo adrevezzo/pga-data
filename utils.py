@@ -19,6 +19,11 @@ def name_clean(name_string):
                 name += char
     return name[::-1]
 
+COUNTRY_NAME_MAP = {
+    'Korea;': 'Korea',
+    'Venezuala': 'Venezuela'
+}
+
 COUNTRIES_FOR_OWGR = [
     'Africa',
     'Argentina',
@@ -26,6 +31,7 @@ COUNTRIES_FOR_OWGR = [
     'Austria',
     'Bangladesh',
     'Belgium',
+    'Brazil',
     'Canada',
     'Chile',
     'China',
@@ -36,12 +42,14 @@ COUNTRIES_FOR_OWGR = [
     'Finland',
     'France',
     'Germany',
+    'Greece',
     'Holland',
     'India',
     'Ireland',
     'Italy',
     'Japan',
     'Korea',
+    'Korea;',
     'Malaysia',
     'Mexico',
     'Netherlands',
@@ -53,17 +61,61 @@ COUNTRIES_FOR_OWGR = [
     'Republic',
     'Rico',
     'Scotland',
+    'Singapore',
     'Slovakia',
     'Spain',
     'States',
     'Sweden',
+    'Switzerland',
     'Taipei',
     'Thailand',
     'Venezuela',
     'Venezuala',
     'Wales',
     'Zealand',
-    'Zimbabwe'
+    'Zimbabwe',
+    'ARG',
+    'AUS',
+    'AUT',
+    'BEL',
+    'CAN',
+    'CHI',
+    'CHN',
+    'COL',
+    'DEN',
+    'ENG',
+    'ESP',
+    'FIJ',
+    'FIN',
+    'FRA',
+    'GER',
+    'GRE',
+    'IND',
+    'IRL',
+    'ITA',
+    'JPN',
+    'KOR',
+    'MAS',
+    'MEX',
+    'NED',
+    'NIR',
+    'NOR',
+    'NZL',
+    'PAR',
+    'PHI',
+    'POR',
+    'RSA',
+    'SCO',
+    'SVK',
+    'SWE',
+    'THA',
+    'TPE',
+    'USA',
+    'VEN',
+    'WAL',
+    'ZIM',
+    '(Chinese',
+    '(Chines',
 ]
 
 COUNTRY_PREFIX_FOR_OWGR = [
@@ -73,5 +125,13 @@ COUNTRY_PREFIX_FOR_OWGR = [
     'New',
     'Chinese',
     'Czech',
-    'Puerto'
+    'Korea;',
+    'Northern',
+    'Puerto',
+    'Taiwan',
+]
+
+COUNTRY_CONCAT_WORDS_FOR_OWGR = [
+    'of',
+    'Taipei)'
 ]
