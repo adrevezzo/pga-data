@@ -48,3 +48,30 @@ INSERT INTO tournaments (
 VALUES
 (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 """
+
+OWGR_INSERT_QUERY = """
+INSERT INTO player_results (
+	rank_this_week,
+	rank_last_week,
+	rank_end_prev_year,
+	player_name,
+	country,
+	average_points,
+	total_points,
+	events_played_div,
+	points_lost_this_year,
+	points_won_this_year,
+	evens_played_act,
+	week_of
+    ) 
+    
+VALUES
+(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, to_date(%s, 'MM.DD.YYYY'))
+"""
+
+OWGR_INSERT_QUERY_BY_COPY = """
+COPY copy_test
+FROM %s
+DELIMITER ',' CSV;
+
+"""

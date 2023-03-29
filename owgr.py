@@ -4,7 +4,8 @@ from PyPDF2 import PdfReader
 import pandas as pd
 from utils import COUNTRIES_FOR_OWGR, COUNTRY_PREFIX_FOR_OWGR, COUNTRY_NAME_MAP, COUNTRY_CONCAT_WORDS_FOR_OWGR
 import datetime
-
+from database import Database
+from queries import OWGR_INSERT_QUERY, OWGR_INSERT_QUERY_BY_COPY
 
 def read_pdf(pdf_file):
     text = ''
@@ -40,19 +41,20 @@ def clean_full_name(end_prev_yr_index: int, stop_index):
     return " ".join(full_name_list)
     
 def fill_last_6_fields(dictionary: dict, page: list, current_index:int, date):
-    dictionary['average_points'].append(page[current_index])
-    dictionary['total_points'].append(page[current_index+1])
-    dictionary['events_played_div'].append(page[current_index+2])
-    dictionary['points_lost_this_year'].append(page[current_index+3])
-    dictionary['points_won_this_year'].append(page[current_index+4])
+    dictionary['average_points'].append(float(page[current_index]))
+    dictionary['total_points'].append(float(page[current_index+1]))
+    dictionary['events_played_div'].append(int(page[current_index+2]))
+    dictionary['points_lost_this_year'].append(float(page[current_index+3]))
+    dictionary['points_won_this_year'].append(float(page[current_index+4]))
     try:
-        dictionary['events_played_act'].append(page[current_index+5])
+        dictionary['events_played_act'].append(int(page[current_index+5]))
     except IndexError:
         dictionary['events_played_act'].append(None)
     dictionary['week_of'].append(date)
 
 
 filepath = 'owgr_pdfs/'
+csv_filepath = 'owgr_csvs/'
 
 row_start_pattern = re.compile(r'^\([0-9]+\)$')
 avg_point_pattern = re.compile(r'^[0-9]+\.[0-9]+$')
@@ -60,9 +62,8 @@ pdf_filename_pattern = re.compile(r'^owgr(?P<week>[0-9]{2})f(?P<year>[0-9]{4}).p
 
 end_prev_year_index = None
 
-
 for file_num, filename in enumerate(os.listdir("owgr_pdfs")):
-    print(f"************ {file_num} ************\n********{filename}*******")
+    print(f"************ {file_num} ************\n********{filename[:-4]}*******")
     owgr_dict = {
         'this_week':[],
         'last_week':[],
@@ -87,9 +88,9 @@ for file_num, filename in enumerate(os.listdir("owgr_pdfs")):
         for i, word in enumerate(page):
             country_type = None
             if row_start_pattern.search(word):
-                owgr_dict['this_week'].append(page[i-1])
-                owgr_dict['last_week'].append(clean_week_strings(page[i]))
-                owgr_dict['end_prev_year'].append(clean_week_strings(page[i+1]))
+                owgr_dict['this_week'].append(int(page[i-1]))
+                owgr_dict['last_week'].append(int(clean_week_strings(page[i])))
+                owgr_dict['end_prev_year'].append(int(clean_week_strings(page[i+1])))
                 end_prev_year_index = i+1
 
             # Three word country
@@ -123,5 +124,10 @@ for file_num, filename in enumerate(os.listdir("owgr_pdfs")):
 
                     
     owgr_df = pd.DataFrame(owgr_dict)
-    print(owgr_df.head(3))
+    owgr_df.to_csv(f"{csv_filepath}{filename[:-4]}.csv")
+    
+    # with Database() as (con, cur):
+
+    
+
 
