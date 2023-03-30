@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS player_results  (
     points_rank INT,
 	tournament_points FLOAT
 );
-);
+
 
 CREATE TABLE IF NOT EXISTS tournaments  (
     id SERIAL PRIMARY KEY,
@@ -76,3 +76,21 @@ DROP COLUMN city,
 DROP COLUMN state,
 DROP COLUMN country,
 DROP COLUMN course_name;
+
+CREATE TABLE IF NOT EXISTS owgr
+(
+    id SERIAL PRIMARY KEY,
+    rank_this_week integer,
+    rank_last_week integer,
+    rank_end_prev_year integer,
+    player_name VARCHAR(255),
+    country VARCHAR(50),
+    average_points double precision,
+    total_points double precision,
+    events_played_div integer,
+    points_lost_this_year double precision,
+    points_won_this_year double precision,
+    evens_played_act VARCHAR(255),
+    week_of date,
+    player_id integer
+);

@@ -50,7 +50,7 @@ VALUES
 """
 
 OWGR_INSERT_QUERY = """
-INSERT INTO player_results (
+INSERT INTO owgr (
 	rank_this_week,
 	rank_last_week,
 	rank_end_prev_year,
@@ -62,15 +62,16 @@ INSERT INTO player_results (
 	points_lost_this_year,
 	points_won_this_year,
 	evens_played_act,
-	week_of
+	week_of,
+    player_id
     ) 
     
 VALUES
-(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, to_date(%s, 'MM.DD.YYYY'))
+(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
 """
-
+# to_date(%s, 'MM.DD.YYYY')
 OWGR_INSERT_QUERY_BY_COPY = """
-COPY copy_test
+\COPY owgr
 FROM %s
 DELIMITER ',' CSV;
 
