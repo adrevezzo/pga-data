@@ -11,7 +11,7 @@ url = "https://orchestrator.pgatour.com/graphql"
 with open("schedule_header.json") as data_completed:
     headers = json.load(data_completed)
 
-with Database(db_type='prod') as (con, cur):
+with Database(db_type='dev') as (con, cur):
     select_tournament_ids = """
     SELECT
     id,

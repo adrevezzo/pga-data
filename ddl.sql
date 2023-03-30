@@ -73,6 +73,14 @@ FROM courses
 WHERE tournaments.course_name = courses.course_name; 
 
 ALTER TABLE tournaments
+ADD COLUMN tournament_end_date date;
+
+UPDATE tournaments
+SET tournament_end_date = c.tournament_end_date
+FROM (SELECT tournament_id, tournament_end_date FROM player_results GROUP BY tournament_id, tournament_end_date) c
+WHERE tournaments.id = c.tournament_id; 
+
+ALTER TABLE tournaments
 DROP COLUMN city,
 DROP COLUMN state,
 DROP COLUMN country,
