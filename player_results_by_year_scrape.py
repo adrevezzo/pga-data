@@ -3,6 +3,7 @@ import time
 import requests
 import json
 import queries
+from psycopg2.errors import UniqueViolation
 
 # Static data for testing
 # with open("player_results_by_year.json") as data:
@@ -42,7 +43,7 @@ for player in all_players[0:4]:
    
     for year in years_active:
         
-        if int(year) <2013:
+        if int(year) <2023:
             print(f"Player: {player[1]}, Year: {year} - skipping")
             continue
         else:
@@ -97,6 +98,14 @@ for player in all_players[0:4]:
                             points_rank,
                             tournament_points
                             )
-                        cur.execute(queries.PLAYER_RESULTS_INSERT_QUERY, data_completed)
-                        con.commit()
+                        
+                        try:
+                            cur.execute(queries.PLAYER_RESULTS_INSERT_QUERY, data_completed)
+
+                        except UniqueViolation:
+                            print(f'Player: {player[1]}, Tournament {tournament_id} Already in database')
+                            con.rollback()
+                        else:
+                            print(f'Player: {player[1]}, Tournament {tournament_id} Added to database')
+                            con.commit()
 

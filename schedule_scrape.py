@@ -6,6 +6,7 @@ import queries
 
 YEARS = ["2013","2014","2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023"]
 # YEARS = ['2023']
+url = "https://orchestrator.pgatour.com/graphql"
 
 with open("schedule_header.json") as data_completed:
     headers = json.load(data_completed)
