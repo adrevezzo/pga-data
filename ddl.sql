@@ -52,7 +52,7 @@ CREATE TABLE courses (
 	country VARCHAR(255)
 
 );
-
+/* This is not used - a separate scrape was built to fill the courses table
 INSERT INTO courses (course_name, city, state, country)
 SELECT 
 DISTINCT 
@@ -62,6 +62,7 @@ state,
 country
 
 FROM tournaments;
+*/
 
 ALTER TABLE tournaments
 ADD column course_id INT;
@@ -77,6 +78,7 @@ DROP COLUMN state,
 DROP COLUMN country,
 DROP COLUMN course_name;
 
+-- Create OWGR Table
 CREATE TABLE IF NOT EXISTS owgr
 (
     id SERIAL PRIMARY KEY,
