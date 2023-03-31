@@ -2,7 +2,7 @@ import json
 
 
 def create_json_file(filename, dictionary):
-    with open(filename, 'w') as file:
+    with open(filename, 'w', encoding='utf-8') as file:
         json.dump(dictionary, file)
 
 
