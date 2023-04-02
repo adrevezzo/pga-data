@@ -25,7 +25,7 @@ class Database:
 
     def __enter__(self):
         self.open()
-        return (self.conn, self.cursor)
+        return (self, self.conn, self.cursor)
 
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -64,3 +64,23 @@ class Database:
         results = self.cursor.fetchone().get(return_key)              
      
         return results
+    
+
+    def create_table(self, table: str, columns: list[str], column_type: list):
+
+        set_columns = (sql.SQL("{} {}").format(
+            sql.Identifier(item[0]),
+            sql.SQL(item[1])
+        ) for item in list(zip(columns, column_type)))
+
+        join_column_def = sql.SQL(",").join(set_columns)
+
+        query = sql.SQL("""CREATE TABLE IF NOT EXISTS {} ({})""").format(
+            sql.Identifier(table),
+            join_column_def
+            
+        )
+
+        print(query.as_string(self.conn))
+        self.cursor.execute(query)
+        self.conn.commit()
