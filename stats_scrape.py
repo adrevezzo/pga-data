@@ -151,22 +151,15 @@ PATTERN_DICT = {
 
 with open("stat_id_dictionary.json") as stat_list:
     all_stats = json.load(stat_list)
-# print(len(all_stats))
-# print(len(max(list(all_stats.values()),key=len)))
-# print([f"len: {len(name)} : {name}" for name in list(all_stats.values()) if len(name) > 30])
 
 with open("drv_dist_example.json") as stat_example:
     ex = json.load(stat_example)
 
-stat_headers = ['id', 'player', 'avg', 'total_distance', 'total_drives']
-
-stat_types = ['SERIAL PRIMARY KEY', 'VARCHAR(255)', 'VARCHAR(255)', 'VARCHAR(255)', 'VARCHAR(255)']
-
 
 url = "https://orchestrator.pgatour.com/graphql"
+
 with open("stats_header.json") as data_completed:
     headers = json.load(data_completed)
-
 
 with Database(db_type='dev') as (db, con, cur):
     select_query = """
@@ -183,15 +176,13 @@ with Database(db_type='dev') as (db, con, cur):
     cur.execute(select_query)
     tournament_id_results = cur.fetchall()
 
-
 player_id_dict = {result.get("pga_id"):int(result.get("id")) for result in player_id_results }
 tournament_id_dict = {result.get("pga_tournament_id"):int(result.get("id")) for result in tournament_id_results }
-
 
 with Database(db_type='dev') as (db, con, cur):
     for stat in list(all_stats.keys())[:2]:
         stat_headers = ['id', 'pga_stat_id', 'pga_stat_name', 'player_id', 'thru_tournament_id']
-        stat_types = ['SERIAL PRIMARY KEY', 'VARCHAR(255)', 'INT', 'VARCHAR(255)', 'INT']
+        stat_types = ['SERIAL PRIMARY KEY', 'VARCHAR(255)', 'VARCHAR(255)', 'INT', 'INT']
         payload = f"{{\"query\":\"query StatDetails($tourCode: TourCode!, $statId: String!, $year: Int, $eventQuery: StatDetailEventQuery) {{\\n  statDetails(\\n    tourCode: $tourCode\\n    statId: $statId\\n    year: $year\\n    eventQuery: $eventQuery\\n  ) {{\\n    tourCode\\n    year\\n    displaySeason\\n    statId\\n    statType\\n    tournamentPills {{\\n      tournamentId\\n      displayName\\n    }}\\n    yearPills {{\\n      year\\n      displaySeason\\n    }}\\n    statTitle\\n    statDescription\\n    tourAvg\\n    lastProcessed\\n    statHeaders\\n    statCategories {{\\n      category\\n      displayName\\n      subCategories {{\\n        displayName\\n        stats {{\\n          statId\\n          statTitle\\n        }}\\n      }}\\n    }}\\n    rows {{\\n      ... on StatDetailsPlayer {{\\n        __typename\\n        playerId\\n        playerName\\n        country\\n        countryFlag\\n        rank\\n        rankDiff\\n        rankChangeTendency\\n        stats {{\\n          statName\\n          statValue\\n          color\\n        }}\\n      }}\\n      ... on StatDetailTourAvg {{\\n        __typename\\n        displayName\\n        value\\n      }}\\n    }}\\n    sponsorLogo\\n  }}\\n}}\",\"operationName\":\"StatDetails\",\"variables\":{{\"tourCode\":\"R\",\"statId\":\"{stat}\",\"year\":2023,\"eventQuery\":{{\"queryType\":\"THROUGH_EVENT\",\"tournamentId\":\"R2023007\"}}}}}}"
         time.sleep(3)
         response = requests.request("POST", url, data=payload, headers=headers)
@@ -206,3 +197,11 @@ with Database(db_type='dev') as (db, con, cur):
         table_name = all_stats.get(stat)
 
         db.create_table(table_name, stat_headers, stat_types)
+
+        cols = stat_headers[1:]
+        vals = [
+            ("1", "1", 1, 1, "1","1","1","1","1" ),
+            ("2", "2", 2, 2, "2","2","2","2","2" )
+        ]
+
+        db.bulk_insert(table_name, cols, vals)

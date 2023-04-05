@@ -84,3 +84,21 @@ class Database:
         print(query.as_string(self.conn))
         self.cursor.execute(query)
         self.conn.commit()
+
+
+    def bulk_insert(self, table: str, columns: list, values: list):
+
+        all_values = sql.SQL(",").join(map(sql.Literal, values))   
+
+        set_columns = sql.SQL(",").join(map(sql.Identifier, columns))
+
+        query = sql.SQL("""INSERT INTO {} ({}) VALUES {}""").format(
+            sql.Identifier(table),
+            set_columns,
+            all_values
+            
+        )
+
+        print(query.as_string(self.conn))
+        self.cursor.execute(query)
+        self.conn.commit()
