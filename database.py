@@ -66,8 +66,16 @@ class Database:
         return results
     
 
-    def create_table(self, table: str, columns: list[str], column_type: list):
+    def create_table(self, table: str, columns: list[str], column_type: list, unqie_constraints: list = None):
 
+        if unqie_constraints:
+            uniqe_clause = sql.SQL(", UNIQUE( {} )").format(
+                sql.SQL(",").join(map(sql.Identifier, unqie_constraints))
+            )
+
+        else:
+            uniqe_clause =''
+            
         set_columns = (sql.SQL("{} {}").format(
             sql.Identifier(item[0]),
             sql.SQL(item[1])
@@ -75,13 +83,14 @@ class Database:
 
         join_column_def = sql.SQL(",").join(set_columns)
 
-        query = sql.SQL("""CREATE TABLE IF NOT EXISTS {} ({})""").format(
+        query = sql.SQL("""CREATE TABLE IF NOT EXISTS {} ({} {}) """).format(
             sql.Identifier(table),
-            join_column_def
+            join_column_def,
+            uniqe_clause
             
         )
 
-        print(query.as_string(self.conn))
+        # print(query.as_string(self.conn))
         self.cursor.execute(query)
         self.conn.commit()
 
@@ -99,6 +108,6 @@ class Database:
             
         )
 
-        print(query.as_string(self.conn))
+        # print(query.as_string(self.conn))
         self.cursor.execute(query)
         self.conn.commit()

@@ -1,5 +1,21 @@
 import json
 
+def get_column_names(schema, table_name, cur):
+    col_query = """
+    SELECT * 
+    FROM  information_schema.columns 
+    WHERE table_schema = %s 
+    and table_name = %s
+    order by
+    ordinal_position
+    """
+
+    cur.execute(col_query, (schema, table_name))
+    col_results = cur.fetchall()
+ 
+    return [result.get("column_name") for result in col_results]
+
+
 
 def create_json_file(filename, dictionary):
     with open(filename, 'w', encoding='utf-8') as file:
