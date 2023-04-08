@@ -170,7 +170,7 @@ for file_num, filename in enumerate(os.listdir("owgr_pdfs")[:]):
     
 
 
-    with Database(db_type='prod') as (con, cur):
+    with Database(db_type='prod') as (db, con, cur):
         cur.executemany(OWGR_INSERT_QUERY, data)
         con.commit()
     

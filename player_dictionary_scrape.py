@@ -19,7 +19,7 @@ import json
 with open("player_dictionary.json") as data_completed:
     players = json.load(data_completed)
 
-with Database(db_type='dev') as (con, cur):
+with Database(db_type='dev') as (db, con, cur):
     get_players_query = """
     SELECT 
     first_name || ' ' || last_name as player_name

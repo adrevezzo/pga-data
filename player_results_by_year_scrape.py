@@ -9,7 +9,7 @@ from psycopg2.errors import UniqueViolation
 # with open("player_results_by_year.json") as data:
 #     all_data = json.load(data)
 
-with Database(db_type='dev') as (con, cur):
+with Database(db_type='dev') as (db, con, cur):
     get_players_query = """
     SELECT 
     first_name || ' ' || last_name as player_name
@@ -54,7 +54,7 @@ for player in all_players[0:4]:
             response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
             all_data = response.json()
 
-            with Database(db_type='dev') as (con, cur):
+            with Database(db_type='dev') as (db, con, cur):
                 query_id = all_data['data']['playerProfileSeasonResults']['playerId']
                 cur.execute(queries.PLAYER_ID_SELECT, (query_id,))
                 result = cur.fetchone()

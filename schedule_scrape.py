@@ -27,7 +27,7 @@ for year in YEARS:
     data_upcoming = all_data['data']['schedule']['upcoming']
     season = all_data['data']['schedule']['seasonYear']
   
-    with Database(db_type='dev') as (con, cur):
+    with Database(db_type='dev') as (db, con, cur):
         for status in (data_completed, data_upcoming):
             for tournament_month in status:
                 month = tournament_month['month']
