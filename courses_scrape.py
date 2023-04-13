@@ -3,13 +3,13 @@ import time
 import json
 from database import Database
 import queries
+from graphql import GraphQLQuery
+from psycopg2.errors import UniqueViolation
+
+gql = GraphQLQuery()
 
 tournaments_without_course = []
 courses_added = []
-
-url = "https://orchestrator.pgatour.com/graphql"
-with open("schedule_header.json") as data_completed:
-    headers = json.load(data_completed)
 
 with Database(db_type='dev') as (db, con, cur):
     select_tournament_ids = """
@@ -17,14 +17,14 @@ with Database(db_type='dev') as (db, con, cur):
     id,
     pga_tournament_id
     FROM tournaments
-    /* WHERE id > 80 */
+    WHERE year = '2023'
     """
 
     cur.execute(select_tournament_ids)
     results = cur.fetchall()
 
     for result in results:
-        print(result)
+        # print(result)
         insert_course_data = """
         INSERT INTO courses (
             course_name,
@@ -38,12 +38,8 @@ with Database(db_type='dev') as (db, con, cur):
         (%s, %s, %s, %s, %s)
         
         """
-        payload_for_course_id = f"{{\"query\":\"query Tournaments($ids: [ID!]) {{\\n  tournaments(ids: $ids) {{\\n    id\\n    tournamentName\\n    tournamentLogo\\n    tournamentLocation\\n    tournamentStatus\\n    roundStatusDisplay\\n    roundDisplay\\n    roundStatus\\n    roundStatusColor\\n    currentRound\\n    timezone\\n    pdfUrl\\n    seasonYear\\n    displayDate\\n    country\\n    state\\n    city\\n    scoredLevel\\n    events {{\\n      id\\n      eventName\\n      leaderboardId\\n    }}\\n    courses {{\\n      id\\n      courseName\\n      courseCode\\n      hostCourse\\n      scoringLevel\\n    }}\\n    weather {{\\n      logo\\n      logoDark\\n      logoAccessibility\\n      tempF\\n      tempC\\n      condition\\n      windDirection\\n      windSpeedMPH\\n      windSpeedKPH\\n      precipitation\\n      humidity\\n    }}\\n    ticketsURL\\n    tournamentSiteURL\\n    formatType\\n    features\\n  }}\\n}}\",\"operationName\":\"Tournaments\",\"variables\":{{\"ids\":\"{result.get('pga_tournament_id')}\"}}}}" 
-        time.sleep(7)
-        response = requests.request("POST", url, data=payload_for_course_id, headers=headers)
-        
-        
-        all_data = response.json()
+        time.sleep(7)  
+        all_data = gql.scrape_courses(result.get('pga_tournament_id'))
 
         try:
             tournament_data = all_data['data']['tournaments'][0]
@@ -69,9 +65,15 @@ with Database(db_type='dev') as (db, con, cur):
                         country
                         )
 
-                    cur.execute(insert_course_data, data_completed)
-                    con.commit()
-                    courses_added.append(course_id_pga)
+                    try:
+                        cur.execute(insert_course_data, data_completed)
+                    except UniqueViolation:
+                        print(f"Course {course_name} already in database")
+                        con.rollback()
+                    else:
+                        print(f"Course {course_name} added to database")
+                        con.commit()
+                        courses_added.append(course_id_pga)
 
 
 
