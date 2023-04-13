@@ -54,7 +54,7 @@ thru_tourn_list = [result.get("pga_tournament_id") for result in thru_tourn_resu
 with Database(db_type='dev') as (db, con, cur):
     for tournament in thru_tourn_list:
         print(tournament)
-        for stat in list(all_stats.keys())[12:13]:        
+        for stat in list(all_stats.keys())[20:21]:        
             print(all_stats.get(stat))
             table_name = all_stats.get(stat)
 
@@ -78,12 +78,15 @@ with Database(db_type='dev') as (db, con, cur):
                     stat_headers.append(stat_header)
                     stat_types.append("VARCHAR(255)")
 
+                
+
                 db.create_table(table_name, stat_headers, stat_types, ['player_id', 'pga_stat_id', 'thru_tournament_id'])
                 
 
             finally:
                 
                 cols = get_column_names('public', table_name, cur)[1:]
+                req_num_stats = len(cols)
                 vals = []
 
                 for row in stats['data']['statDetails']['rows']:
@@ -105,7 +108,14 @@ with Database(db_type='dev') as (db, con, cur):
                         for val in row['stats']:
                             row_vals.append(val['statValue'])
 
+                        if len(row_vals) < req_num_stats:
+                            i = 0
+                            for i in range(req_num_stats-len(row_vals)):
+                                row_vals.append(None)
+                                i += 1
+
                         vals.append(tuple(row_vals))
+
                 try:
                     db.bulk_insert(table_name, cols, vals)
                 except UniqueViolation:

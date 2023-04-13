@@ -1,9 +1,10 @@
 from database import Database
 import time
-import requests
-import json
 import queries
 from psycopg2.errors import UniqueViolation
+from graphql import GraphQLQuery
+
+gql = GraphQLQuery()
 
 # Static data for testing
 # with open("player_results_by_year.json") as data:
@@ -22,17 +23,8 @@ print(con.closed, " ", cur.closed)
 
 all_players = [(result.get("pga_id"),result.get("player_name")) for result in results]
 
-
-url = "https://orchestrator.pgatour.com/graphql"
-querystring = {"":""}
-
-with open("player_results_header.json") as data_completed:
-    headers = json.load(data_completed)
-
-for player in all_players[0:4]:
-    payload = f"{{\"query\":\"\\tquery PlayerProfileSeasonResults($playerId: ID!, $tourCode: TourCode, $year: Int) {{\\n  playerProfileSeasonResults(\\n    playerId: $playerId\\n    tourCode: $tourCode\\n    year: $year\\n  ) {{\\n    playerId\\n    tour\\n    displayYear\\n    year\\n    events\\n    wins\\n    top10\\n    top25\\n    cutsMade\\n    missedCuts\\n    withdrew\\n    runnerUp\\n    seasonPills {{\\n      tourCode\\n      years {{\\n        year\\n        displaySeason\\n      }}\\n    }}\\n    cupRank\\n    cupPoints\\n    cupName\\n    cupLogo\\n    cupLogoDark\\n    cupLogoAccessibilityText\\n    rankLogo\\n    rankLogoDark\\n    rankLogoAccessibilityText\\n    officialMoney\\n    tournaments {{\\n      tournamentId\\n      tournamentEndDate\\n      tournamentName\\n      finishPosition\\n      r1\\n      r2\\n      r3\\n      r4\\n      r5\\n      total\\n      toPar\\n      pointsRank\\n      points\\n      tourcastURL\\n      tourcastURLWeb\\n    }}\\n    seasonRecap {{\\n      tourCode\\n      displayMostRecentSeason\\n      mostRecentRecapYear\\n      items {{\\n        year\\n        displaySeason\\n        items {{\\n          tournamentId\\n          year\\n          title\\n          body\\n        }}\\n      }}\\n    }}\\n    amateurHighlights\\n    tourcastEligible\\n  }}\\n}}\\n\\n\\n\\t\",\"operationName\":\"PlayerProfileSeasonResults\",\"variables\":{{\"playerId\":\"{player[0]}\",\"tourCode\":\"R\",\"year\":2023}}}}"
-    response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
-    all_data = response.json()
+for player in all_players[0:6]:
+    all_data = gql.scrape_results(schedule_year=2023, pga_player_id=player[0])
 
     years_active = []
     tour_list = all_data['data']['playerProfileSeasonResults']['seasonPills']
@@ -49,10 +41,8 @@ for player in all_players[0:4]:
         else:
             print(f"Player: {player[1]}, Year: {year}")
 
-            time.sleep(10)
-            payload = f"{{\"query\":\"\\tquery PlayerProfileSeasonResults($playerId: ID!, $tourCode: TourCode, $year: Int) {{\\n  playerProfileSeasonResults(\\n    playerId: $playerId\\n    tourCode: $tourCode\\n    year: $year\\n  ) {{\\n    playerId\\n    tour\\n    displayYear\\n    year\\n    events\\n    wins\\n    top10\\n    top25\\n    cutsMade\\n    missedCuts\\n    withdrew\\n    runnerUp\\n    seasonPills {{\\n      tourCode\\n      years {{\\n        year\\n        displaySeason\\n      }}\\n    }}\\n    cupRank\\n    cupPoints\\n    cupName\\n    cupLogo\\n    cupLogoDark\\n    cupLogoAccessibilityText\\n    rankLogo\\n    rankLogoDark\\n    rankLogoAccessibilityText\\n    officialMoney\\n    tournaments {{\\n      tournamentId\\n      tournamentEndDate\\n      tournamentName\\n      finishPosition\\n      r1\\n      r2\\n      r3\\n      r4\\n      r5\\n      total\\n      toPar\\n      pointsRank\\n      points\\n      tourcastURL\\n      tourcastURLWeb\\n    }}\\n    seasonRecap {{\\n      tourCode\\n      displayMostRecentSeason\\n      mostRecentRecapYear\\n      items {{\\n        year\\n        displaySeason\\n        items {{\\n          tournamentId\\n          year\\n          title\\n          body\\n        }}\\n      }}\\n    }}\\n    amateurHighlights\\n    tourcastEligible\\n  }}\\n}}\\n\\n\\n\\t\",\"operationName\":\"PlayerProfileSeasonResults\",\"variables\":{{\"playerId\":\"{player[0]}\",\"tourCode\":\"R\",\"year\":{year}}}}}"
-            response = requests.request("POST", url, data=payload, headers=headers, params=querystring)
-            all_data = response.json()
+            time.sleep(7)
+            all_data = gql.scrape_results(schedule_year=year, pga_player_id=player[0])
 
             with Database(db_type='dev') as (db, con, cur):
                 query_id = all_data['data']['playerProfileSeasonResults']['playerId']
