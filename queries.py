@@ -76,3 +76,4 @@ FROM %s
 DELIMITER ',' CSV;
 
 """
+

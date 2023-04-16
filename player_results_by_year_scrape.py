@@ -10,7 +10,7 @@ gql = GraphQLQuery()
 # with open("player_results_by_year.json") as data:
 #     all_data = json.load(data)
 
-with Database(db_type='dev') as (db, con, cur):
+with Database(db_type='prod') as (db, con, cur):
     get_players_query = """
     SELECT 
     first_name || ' ' || last_name as player_name
@@ -19,11 +19,11 @@ with Database(db_type='dev') as (db, con, cur):
     """
     cur.execute(get_players_query)
     results = cur.fetchall()
-print(con.closed, " ", cur.closed)
+
 
 all_players = [(result.get("pga_id"),result.get("player_name")) for result in results]
 
-for player in all_players[0:6]:
+for player in all_players:
     all_data = gql.scrape_results(schedule_year=2023, pga_player_id=player[0])
 
     years_active = []
@@ -43,8 +43,8 @@ for player in all_players[0:6]:
 
             time.sleep(7)
             all_data = gql.scrape_results(schedule_year=year, pga_player_id=player[0])
-
-            with Database(db_type='dev') as (db, con, cur):
+            
+            with Database(db_type='prod') as (db, con, cur):
                 query_id = all_data['data']['playerProfileSeasonResults']['playerId']
                 cur.execute(queries.PLAYER_ID_SELECT, (query_id,))
                 result = cur.fetchone()
@@ -58,6 +58,7 @@ for player in all_players[0:6]:
                     result = cur.fetchone()
                     
                     if not result:
+                        print(f"{pga_tournament_id} not in db")
                         continue
                     else:
                         tournament_id = result.get("id")
@@ -87,7 +88,7 @@ for player in all_players[0:6]:
                             to_par,
                             points_rank,
                             tournament_points
-                            )
+                            )                       
                         
                         try:
                             cur.execute(queries.PLAYER_RESULTS_INSERT_QUERY, data_completed)
@@ -99,3 +100,12 @@ for player in all_players[0:6]:
                             print(f'Player: {player[1]}, Tournament {tournament_id} Added to database')
                             con.commit()
 
+with Database(db_type='prod') as (db, con, cur):
+    update_tournament_end_dates_query = """
+    UPDATE tournaments
+    SET tournament_end_date = c.tournament_end_date
+    FROM (SELECT tournament_id, tournament_end_date FROM player_results GROUP BY tournament_id, tournament_end_date) c
+    WHERE tournaments.id = c.tournament_id; 
+    """
+    cur.execute(update_tournament_end_dates_query)
+    con.commit()

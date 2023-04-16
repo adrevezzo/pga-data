@@ -1,8 +1,5 @@
-import requests
 import time
-import json
 from database import Database
-import queries
 from graphql import GraphQLQuery
 from psycopg2.errors import UniqueViolation
 
