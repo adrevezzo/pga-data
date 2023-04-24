@@ -195,7 +195,8 @@ PLAYER_NAME_CLEANUP = {
     'Matthew Every': 'Matt Every',
     'Hideki Matsuyama(Am)': 'Hideki Matsuyama',
     'Matthew Fitzpatrick': 'Matt Fitzpatrick',
-    'Guillermo Mito Pereira': 'Mito Pereira'
+    'Guillermo Mito Pereira': 'Mito Pereira',
+    'Tyler Duncan(Jul1989)': 'Tyler Duncan',
 
 }
 
