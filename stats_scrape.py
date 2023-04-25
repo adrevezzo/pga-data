@@ -11,10 +11,10 @@ gql = GraphQLQuery()
 with open("stat_id_dictionary.json") as stat_list:
     all_stats = json.load(stat_list)
  
-with open("sg_tot_example.json") as stat_example:
-    ex = json.load(stat_example)
+# with open("sg_tot_example.json") as stat_example:
+#     ex = json.load(stat_example)
 
-with Database(db_type='dev') as (db, con, cur):
+with Database(db_type='prod') as (db, con, cur):
     select_query = """
     SELECT id, pga_id, first_name || ' ' || last_name as player_name
     from players
@@ -42,6 +42,7 @@ with Database(db_type='dev') as (db, con, cur):
     AND lower(tournament_name) NOT LIKE 'corales%'
     AND lower(tournament_name) NOT LIKE 'puerto rico%'
     AND lower(tournament_name) NOT LIKE 'butterfield%'
+    AND lower(tournament_name) NOT LIKE 'zurich classic%'
     order by tournament_end_date desc  
     """
     cur.execute(thru_tourn_select)
@@ -51,14 +52,14 @@ player_id_dict = {result.get("pga_id"):int(result.get("id")) for result in playe
 tournament_id_dict = {result.get("pga_tournament_id"):int(result.get("id")) for result in tournament_id_results }
 thru_tourn_list = [result.get("pga_tournament_id") for result in thru_tourn_results]
 
-with Database(db_type='dev') as (db, con, cur):
+with Database(db_type='prod') as (db, con, cur):
     for tournament in thru_tourn_list:
         print(tournament)
-        for stat in list(all_stats.keys())[20:21]:        
+        for stat in list(all_stats.keys())[:10]:        
             print(all_stats.get(stat))
             table_name = all_stats.get(stat)
 
-            time.sleep(7)
+            time.sleep(6)
             stats = gql.scrape_stats(stat_id=stat, schedule_year=2023, through_event_flag="THROUGH_EVENT", pga_tournament_id=tournament)
             
             try:
