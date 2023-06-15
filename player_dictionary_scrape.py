@@ -37,6 +37,7 @@ with Database(db_type='dev') as (db, con, cur):
     """
 
     for player in players['data']['playerDirectory']['players']:
+        print(f"{player.get('isActive')} : {type(player.get('isActive'))}")
         if player.get("id") in list(player_ids):
             print(f"\n{player['firstName']} {player['lastName']} in database")
             continue
